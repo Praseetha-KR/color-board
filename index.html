@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Color Board</title>
+</head>
+<body>
+	HEX:<input type="text" id="hex">
+	RGB:<input type="text" id="rgb">
+	<script>
+		var hex = document.getElementById('hex');
+		var rgb = document.getElementById('rgb');
+		var body = document.getElementsByTagName('body')[0];
+		hex.onkeyup = function() {
+			var hexVal = hex.value.split("");
+			body.style.backgroundColor = "#" + hex.value;
+			var n = hexVal.reduce(function(p, c, i, a) {
+				if ((i % 2) == 0) {
+					p.push(c);
+				} else {
+					p[(i-1)/2] += c;
+				}
+				return p;
+			}, []).map(function(num) {
+				return parseInt(num, 16);
+			}).join(", ");
+			if (document.getElementById('hex').value == "") {
+				rgb.value = "";
+			} else {
+				rgb.value = "rgb(" + n + ")";
+			}
+		}
+	</script>
+</body>
+</html>
