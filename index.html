@@ -3,33 +3,73 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Color Board</title>
+	<style>
+		.calc-box input[type=text] {
+			display: block;
+			background-color: transparent;
+			border: none;
+			border-bottom: 1px solid #000;
+			font-size: 2em;
+			width: 10em;
+		}
+		input[type=text]:focus {
+			outline: none;
+		}
+		body {
+			background-color: yellow;
+			font-family: sans-serif;
+		}
+		h1 {
+			font-weight: 300;
+		}
+	</style>
 </head>
 <body>
-	HEX:<input type="text" id="hex">
-	RGB:<input type="text" id="rgb">
+	<div class="calc-box">
+		<div id="header"><h1>HEX to RGB Converter</h1></div>
+		<input type="text" id="hex" placeholder="hex">
+		<input type="text" id="rgb" placeholder="rgb">
+	</div>
+	
 	<script>
 		var hex = document.getElementById('hex');
 		var rgb = document.getElementById('rgb');
+		// var fontColor = (parseInt('0x'+hex, 16) > 0xffffff/2) ? 'black' : 'white';
 		var body = document.getElementsByTagName('body')[0];
+		
 		hex.onkeyup = function() {
-			var hexVal = hex.value.split("");
-			body.style.backgroundColor = "#" + hex.value;
-			var n = hexVal.reduce(function(p, c, i, a) {
-				if ((i % 2) == 0) {
-					p.push(c);
-				} else {
-					p[(i-1)/2] += c;
-				}
-				return p;
-			}, []).map(function(num) {
-				return parseInt(num, 16);
-			}).join(", ");
 			if (document.getElementById('hex').value == "") {
 				rgb.value = "";
 			} else {
-				rgb.value = "rgb(" + n + ")";
+				if (hex.value.length == 6) {
+					body.style.backgroundColor = "#" + hex.value;
+
+					var hexVal = hex.value.split("");
+					var n = hexVal.reduce(function(p, c, i, a) {
+						if ((i % 2) == 0) {
+							p.push(c);
+						} else {
+							p[(i-1)/2] += c;
+						}
+						return p;
+					}, []).map(function(num) {
+						return parseInt(num, 16);
+					});
+					rgb.value = "rgb(" + n.join(", ") + ")";
+					var yiq = ((n[0] * 299) + (n[1] * 587) + (n[2] * 114))/1000;
+					var fontColor = ((yiq >= 128) ? 'black' : 'white');
+					hex.style.color = fontColor;
+					hex.style.borderColor = fontColor;
+					rgb.style.color = fontColor;
+					rgb.style.borderColor = fontColor;
+					document.getElementById('header').style.color = fontColor;
+				} else {
+					rgb.value = "";
+				}
 			}
 		}
+
+		
 	</script>
 </body>
 </html>
