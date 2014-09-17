@@ -1,0 +1,18 @@
+body {
+	background-color: yellow;
+	font-family: sans-serif;
+}
+h1 {
+	font-weight: 300;
+}
+input[type=text] {
+	display: block;
+	background-color: transparent;
+	border: none;
+	border-bottom: 1px solid #000;
+	font-size: 2em;
+	width: 10em;
+}
+input[type=text]:focus {
+	outline: none;
+}

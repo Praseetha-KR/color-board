@@ -1,4 +1,4 @@
 color-board
 ===========
 
-Color value converter
+Color code converter
