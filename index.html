@@ -69,6 +69,28 @@
 			}
 		}
 
+		rgb.onkeyup = function() {
+			if (document.getElementById('rgb').value == "") {
+				hex.value = "";
+			} else {
+				if (/^(rgb\([0-9]+,[0-9]+,[0-9]+\))$/.test(rgb.value)) {
+					body.style.backgroundColor = rgb.value;
+
+					var rgbVal = rgb.value.replace("rgb(", "").replace(")", "").split(",");
+					var n;
+					var hexVal = rgbVal.map(function(num) {
+						n = (parseInt(num)).toString(16);
+						if (n.length == 1) {
+							n = '0' + n;
+						}
+						return n;
+					}).join("");
+					hex.value = hexVal.toUpperCase();
+				} else {
+					hex.value = "";
+				}
+			}
+		}
 		
 	</script>
 </body>
