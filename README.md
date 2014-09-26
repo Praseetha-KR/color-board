@@ -1,7 +1,7 @@
 Color Board
 ===========
 
-Color code converter
+Color code converter using Vanila JS
 <pre>
     HEX
    /  \
