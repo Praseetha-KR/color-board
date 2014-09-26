@@ -8,7 +8,7 @@ var hslInput = document.getElementById('hsl');
 
 var body = document.getElementsByTagName('body')[0];
 
-// hexcode to ["r", "g", "b"] conversion
+// hexcode to [r,g,b] conversion
 var hexToRgb = function(hex) {
 	var hexArr = hex.split("");
 	var rgb = hexArr.reduce(function(p, c, i, a) {
@@ -24,7 +24,7 @@ var hexToRgb = function(hex) {
 	return rgb;
 }
 
-// ["r", "g", "b"] to hexcode conversion
+// [r,g,b] to hexcode conversion
 var rgbToHex = function(rgb) {
 	var n;
 	var hex = rgb.map(function(num) {
@@ -37,37 +37,7 @@ var rgbToHex = function(rgb) {
 	return hex;
 }
 
-// ["r", "g", "b"] to hexcode conversion
-// var rgbToHsl = function(rgb) {
-// 	var r = rgb[0]/255;
-// 	var g = rgb[1]/255;
-// 	var b = rgb[2]/255;
-// 	var min = Math.min.apply(null, rgb);
-// 	var max = Math.max.apply(null, rgb);
-// 	var h, s, l = (max + min) / 2;
-
-// 	if (max == min) {
-// 		h = s = 0; 
-// 	} else {
-// 		var d = max - min;
-
-// 		s = (l < 0.5) ? (d / (max + min)) : (d / (2 - max - min));
-
-// 		switch(max) {
-// 			case r:
-// 				h = (g - b) / d + (g < b ? 6 : 0);
-// 				break;
-// 			case g:
-// 				h = (b - r) / d + 2;
-// 				break;
-// 			case b:
-// 				h = (r - g) / d + 4;
-// 				break;
-// 		}
-// 		h /= 6;
-// 	}
-// 	return [h, s, l];
-// }
+// [r,g,b] to [h,s,l] conversion
 function rgbToHsl(rgb){
     r = (rgb[0]/255).toFixed(2), g = (rgb[1]/255).toFixed(2), b = (rgb[2]/255).toFixed(2);
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -90,7 +60,53 @@ function rgbToHsl(rgb){
         	h *= 360;
         }
     }
-    return [Math.ceil(h), (s.toFixed(2))*100, Math.ceil(l*100)];
+    return [Math.round(h), (s.toFixed(2))*100, Math.round(l*100)];
+}
+// [h,s,l] to [r,g,b] conversion
+function hslToRgb(hsl){
+	var h = hsl[0]/360, s = hsl[1] / 100, l = hsl[2] / 100;
+	var temp_rgb = [], temp1 = 0.0, temp2 = 0.0;
+	if (s == 0) {
+		var v = l * 255;
+		var rgb = hsl.map(function(num) {
+			num = v;
+			return num;
+		});
+		return rgb;
+ 
+	} else {
+		if (l < 0.5) {
+			temp1 = l * (1.0 + s);
+		} else {
+			temp1 = l + s - l * s;
+		}
+	}
+	temp2 = (2 * l - temp1).toFixed(4);
+
+	temp_rgb[0] = parseFloat((h + 0.333).toFixed(4));
+	temp_rgb[1] = parseFloat(h.toFixed(4));
+	temp_rgb[2] = parseFloat((h - 0.333).toFixed(4));
+
+	var rgb = temp_rgb.map(function(num) {
+		if (num < 0) { 
+			num += 1;
+		} else if (num > 1) {
+			num -= 1;
+		}
+		console.log(num);
+		if ((6 * num) < 1) {
+			num = temp2 + (temp1 - temp2) * 6 * num;
+		} else if ((2 * num) < 1) {
+			num = temp1;
+		} else if ((3 * num) < 2) {
+			num = temp2 + (temp1 - temp2) * (0.666 - num) * 6;
+		} else {
+			num = temp2;
+		}
+		num *= 255;
+		return (Math.round(num));
+	});
+	return rgb;
 }
 
 // change foreground components color with bg
@@ -121,7 +137,7 @@ hexInput.onkeyup = function() {
 			body.style.backgroundColor = "#" + hex;
 			var rgb = hexToRgb(hex);
 			var hsl = rgbToHsl(rgb);
-			hslInput.value = "hsl(" + hsl[0] + "˚," + hsl[1] + "%," + [hsl[2]] + "%)";
+			hslInput.value = "hsl(" + hsl[0] + ", " + hsl[1] + ", " + [hsl[2]] + ")";
 			rgbInput.value = "rgb(" + rgb.join(", ") + ")";
 			changeColorWithBg(rgb);
 		} else {
@@ -144,7 +160,7 @@ rgbInput.onkeyup = function() {
 			changeColorWithBg(rgb);
 			
 			hsl = rgbToHsl(rgb);
-			hslInput.value = "hsl(" + hsl[0] + "˚," + hsl[1] + "%," + [hsl[2]] + "%)";
+			hslInput.value = "hsl(" + hsl[0] + "," + hsl[1] + "," + [hsl[2]] + ")";
 		} else {
 			hexInput.value = "";
 			hslInput.value = "";
@@ -154,11 +170,21 @@ rgbInput.onkeyup = function() {
 
 hslInput.onkeyup = function() {
 	if (hslInput.value == "") {
-		hslInput.value = "";
+		hexInput.value = "";
+		rgbInput.value = "";
 	} else {
-		if (/^(hsl\(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5]\))$/) {
-
-
+		if (/^(hsl\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360),\s*([0-9]|[1-9][0-9]|100),\s*([0-9]|[1-9][0-9]|100)\s*\))$/.test(hslInput.value)) {
+			var hsl = hslInput.value.replace("hsl(", "").replace(")", "").split(",");
+			console.log(hsl);
+			var rgb = hslToRgb(hsl);
+			var hex = rgbToHex(rgb);
+			rgbInput.value = "rgb(" + rgb.join(", ") + ")";
+			hexInput.value = ("#").concat(hex.toUpperCase());
+			body.style.backgroundColor = rgbInput.value;
+			changeColorWithBg(rgb);
+		} else {
+			hexInput.value = "";
+			rgbInput.value = "";
 		}
 	}
 }
