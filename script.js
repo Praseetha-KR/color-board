@@ -39,7 +39,7 @@ var rgbToHex = function(rgb) {
 
 // [r,g,b] to [h,s,l] conversion
 function rgbToHsl(rgb){
-    r = (rgb[0]/255).toFixed(2), g = (rgb[1]/255).toFixed(2), b = (rgb[2]/255).toFixed(2);
+    r = parseFloat((rgb[0]/255).toFixed(2)), g = parseFloat((rgb[1]/255).toFixed(2)), b = parseFloat((rgb[2]/255).toFixed(2));
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var d = max - min, sum = max + min;
     var h, s, l = sum / 2;
@@ -57,10 +57,10 @@ function rgbToHsl(rgb){
         }
         h *= 60;
         if (h < 0) {
-        	h *= 360;
+        	h += 360;
         }
     }
-    return [Math.round(h), (s.toFixed(2))*100, Math.round(l*100)];
+    return [Math.round(h), (parseFloat(s.toFixed(2)))*100, Math.round(l*100)];
 }
 // [h,s,l] to [r,g,b] conversion
 function hslToRgb(hsl){
@@ -81,7 +81,7 @@ function hslToRgb(hsl){
 			temp1 = l + s - l * s;
 		}
 	}
-	temp2 = (2 * l - temp1).toFixed(4);
+	temp2 = parseFloat((2 * l - temp1).toFixed(4));
 
 	temp_rgb[0] = parseFloat((h + 0.333).toFixed(4));
 	temp_rgb[1] = parseFloat(h.toFixed(4));
