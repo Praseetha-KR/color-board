@@ -9,7 +9,7 @@ var hslInput = document.getElementById('hsl');
 var body = document.getElementsByTagName('body')[0];
 
 // hexcode to [r,g,b] conversion
-var hexToRgb = function(hex) {
+function hexToRgb(hex) {
 	var hexArr = hex.split("");
 	var rgb = hexArr.reduce(function(p, c, i, a) {
 		if ((i % 2) == 0) {
@@ -25,7 +25,7 @@ var hexToRgb = function(hex) {
 }
 
 // [r,g,b] to hexcode conversion
-var rgbToHex = function(rgb) {
+function rgbToHex(rgb) {
 	var n;
 	var hex = rgb.map(function(num) {
 		n = (parseInt(num)).toString(16);
@@ -110,7 +110,7 @@ function hslToRgb(hsl){
 }
 
 // change foreground components color with bg
-var changeColorWithBg = function(arr) {
+function changeColorWithBg(arr) {
 	var yiq = ((arr[0] * 299) + (arr[1] * 587) + (arr[2] * 114))/1000;
 	var fontColor = ((yiq >= 128) ? 'black' : 'white');
 	// ref: http://24ways.org/2010/calculating-color-contrast/
