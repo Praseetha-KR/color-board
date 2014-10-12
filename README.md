@@ -1,7 +1,7 @@
 Color Board
 ===========
 
-https://travis-ci.org/Praseetha-KR/color-board.svg?branch=master
+<img src="https://travis-ci.org/Praseetha-KR/color-board.svg?branch=master" alt="">
 
 Color code converter using Vanilla JS
 <pre>
