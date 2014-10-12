@@ -23,7 +23,7 @@ function isRgb_valid(rgbval) {
 	return pattern.test(rgbval);
 }
 describe("rgb text input", function() {
-	it("is having correct syntax rgb(r,g,b); where r, g & b values range [0-255]", function() {
+	it("is having correct syntax rgb([0-255],[0-255],[0-255])", function() {
 		result = isRgb_valid("rgb(0,10,255)");
 		expect(result).toBe(true);
 	});
@@ -61,7 +61,7 @@ function isHsl_valid(hslval) {
 	return pattern.test(hslval);
 }
 describe("hsl text input", function() {
-	it("is having correct syntax hsl(h,s,l); where h -> [0-360], s & l -> [0-100]", function() {
+	it("is having correct syntax hsl([0-360],[0-100],[0-100])", function() {
 		result = isHsl_valid("hsl(180,50,100)");
 		expect(result).toBe(true);
 	});
