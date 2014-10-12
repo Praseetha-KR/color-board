@@ -1,6 +1,8 @@
 Color Board
 ===========
 
+https://travis-ci.org/Praseetha-KR/color-board.svg?branch=master
+
 Color code converter using Vanilla JS
 <pre>
     HEX
