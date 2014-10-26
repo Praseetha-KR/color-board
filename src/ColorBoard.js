@@ -9,25 +9,50 @@ var hslInput = document.getElementById('hsl');
 var body = document.getElementsByTagName('body')[0];
 
 
+function removeSpaces(str) {
+	return str.replace(/\s/g, "");
+}
+
+function strToNumArray(str) {
+	return str.replace(/[a-zA-Z\(\)\s°%]*/g, "").split(",");
+}
+
 function isHex(str) {
 	if (/^\s*#?([a-fA-F0-9]){6}\s*$/.test(str)) {
-		return true;
+		hex = removeSpaces(str);
+		if (hex.charAt(0) == '#') {
+			hex = hex.substr(1);
+		}
+		return hex;
 	} else {
 		return false;
 	}
 }
 
-function removeSpaces(str) {
-	return str.replace(/\s/g, "");
+function isRgb(str) {
+	if (/^(\s*(rgb|RGB)\s*\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\)\s*)$/.test(str)) {
+		return removeSpaces(str);
+	} else if (/^(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*)$/.test(str)) {
+		return "rgb(" + removeSpaces(str) + ")";
+	} else {
+		return false;
+	}
+}
+
+function isHsl(str) {
+	if (/^(\s*(hsl|HSL)\s*\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360)\s*(deg|degree|°)?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*\)\s*)$/.test(str)) {
+		return removeSpaces(str);
+	} else if (/^(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360)\s*(deg|degree|°)?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*)$/.test(str)) {
+		return removeSpaces(str);
+	} else {
+		return false;
+	}
 }
 
 // hexcode to [r,g,b] conversion
 function hexToRgb(hex) {
 	if (isHex(hex)) {
-		hex = removeSpaces(hex);
-		if (hex.charAt(0) == '#') {
-			hex = hex.substr(1);
-		}
+		hex = isHex(hex);
 		var hexArr = hex.split("");
 		var rgb = "rgb(" + hexArr.reduce(function(p, c, i, a) {
 			if ((i % 2) == 0) {
@@ -47,88 +72,102 @@ function hexToRgb(hex) {
 
 // [r,g,b] to hexcode conversion
 function rgbToHex(rgb) {
-	var n;
-	var hex = rgb.map(function(num) {
-		n = (parseInt(num)).toString(16);
-		if (n.length == 1) {
-			n = '0' + n;
-		}
-		return n;
-	}).join("");
-	return hex;
+	if (isRgb(rgb)) {
+		rgb = strToNumArray(isRgb(rgb));
+		var n;
+		var hex = "#" + rgb.map(function(num) {
+			n = (parseInt(num)).toString(16);
+			if (n.length == 1) {
+				n = '0' + n;
+			}
+			return n;
+		}).join("").toUpperCase();
+		return hex;
+	} else {
+		return false;
+	}
 }
 
 // [r,g,b] to [h,s,l] conversion
 function rgbToHsl(rgb){
-	rgb = rgb.replace("rgb(", "").replace(")", "").split(",");
-    r = parseFloat((rgb[0]/255).toFixed(2)), g = parseFloat((rgb[1]/255).toFixed(2)), b = parseFloat((rgb[2]/255).toFixed(2));
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var d = max - min, sum = max + min;
-    var h, s, l = sum / 2;
+	if (isRgb(rgb)) {
+		rgb = strToNumArray(rgb);
+		var r,g,b;
+	    r = parseFloat((rgb[0]/255).toFixed(2)), g = parseFloat((rgb[1]/255).toFixed(2)), b = parseFloat((rgb[2]/255).toFixed(2));
+	    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+	    var d = max - min, sum = max + min;
+	    var h, s, l = sum / 2;
 
-    if(d == 0) {
-        h = s = 0;
-    } else {
-        s = l < 0.5 ? (d / sum) : (d / (2.0 - sum));
-        if(max == r) {
-        	h = (g - b) / d;
-        } else if(max == g) {
-        	h = ((b - r) / d) + 2.0;
-        } else if(max == b) {
-        	h = ((r - g) / d) + 4.0;
-        }
-        h *= 60;
-        if (h < 0) {
-        	h += 360;
-        }
-    }
-    return [Math.round(h), (parseFloat(s.toFixed(2)))*100, Math.round(l*100)];
+	    if(d == 0) {
+	        h = s = 0;
+	    } else {
+	        s = l < 0.5 ? (d / sum) : (d / (2.0 - sum));
+	        if(max == r) {
+	        	h = (g - b) / d;
+	        } else if(max == g) {
+	        	h = ((b - r) / d) + 2.0;
+	        } else if(max == b) {
+	        	h = ((r - g) / d) + 4.0;
+	        }
+	        h *= 60;
+	        if (h < 0) {
+	        	h += 360;
+	        }
+	    }
+	    return "hsl(" + Math.round(h) + "," + (parseFloat(s.toFixed(2)))*100 + "," + Math.round(l*100) + ")";
+	} else {
+		return false;
+	}
 }
 // [h,s,l] to [r,g,b] conversion
 function hslToRgb(hsl){
-	var h = hsl[0]/360, s = hsl[1] / 100, l = hsl[2] / 100;
-	var temp_rgb = [], temp1 = 0.0, temp2 = 0.0;
-	if (s == 0) {
-		var v = l * 255;
-		var rgb = hsl.map(function(num) {
-			num = v;
-			return num;
-		});
-		return rgb;
- 
+	if (isHsl(hsl)) {
+		hsl = strToNumArray(hsl);
+		var h = hsl[0]/360, s = hsl[1] / 100, l = hsl[2] / 100;
+		var temp_rgb = [], temp1 = 0.0, temp2 = 0.0;
+		if (s == 0) {
+			var v = l * 255;
+			var rgb = hsl.map(function(num) {
+				num = v;
+				return num;
+			}).join(", ");
+			return "rgb(" + rgb + ")";
+	 
+		} else {
+			if (l < 0.5) {
+				temp1 = l * (1.0 + s);
+			} else {
+				temp1 = l + s - l * s;
+			}
+		}
+		temp2 = parseFloat((2 * l - temp1).toFixed(4));
+
+		temp_rgb[0] = parseFloat((h + 0.333).toFixed(4));
+		temp_rgb[1] = parseFloat(h.toFixed(4));
+		temp_rgb[2] = parseFloat((h - 0.333).toFixed(4));
+
+		var rgb = temp_rgb.map(function(num) {
+			if (num < 0) { 
+				num += 1;
+			} else if (num > 1) {
+				num -= 1;
+			}
+			if ((6 * num) < 1) {
+				num = temp2 + (temp1 - temp2) * 6 * num;
+			} else if ((2 * num) < 1) {
+				num = temp1;
+			} else if ((3 * num) < 2) {
+				num = temp2 + (temp1 - temp2) * (0.666 - num) * 6;
+			} else {
+				num = temp2;
+			}
+			num *= 255;
+			return (Math.round(num));
+		}).join(", ");
+		return "rgb(" + rgb + ")";
 	} else {
-		if (l < 0.5) {
-			temp1 = l * (1.0 + s);
-		} else {
-			temp1 = l + s - l * s;
-		}
+		return false;
 	}
-	temp2 = parseFloat((2 * l - temp1).toFixed(4));
-
-	temp_rgb[0] = parseFloat((h + 0.333).toFixed(4));
-	temp_rgb[1] = parseFloat(h.toFixed(4));
-	temp_rgb[2] = parseFloat((h - 0.333).toFixed(4));
-
-	var rgb = temp_rgb.map(function(num) {
-		if (num < 0) { 
-			num += 1;
-		} else if (num > 1) {
-			num -= 1;
-		}
-		console.log(num);
-		if ((6 * num) < 1) {
-			num = temp2 + (temp1 - temp2) * 6 * num;
-		} else if ((2 * num) < 1) {
-			num = temp1;
-		} else if ((3 * num) < 2) {
-			num = temp2 + (temp1 - temp2) * (0.666 - num) * 6;
-		} else {
-			num = temp2;
-		}
-		num *= 255;
-		return (Math.round(num));
-	});
-	return rgb;
 }
 
 // change foreground components color with bg
@@ -152,9 +191,7 @@ function changeColorWithBg(rgb) {
 hexInput.onkeyup = function() {
 	var rgb = hexToRgb(hexInput.value)
 	if (rgb) {
-		var hsl = rgbToHsl(rgb);
-		hslInput.value = "hsl(" + hsl[0] + ", " + hsl[1] + ", " + [hsl[2]] + ")";
-
+		hslInput.value = rgbToHsl(rgb);
 		rgbInput.value = rgb;
 		changeColorWithBg(rgb);
 	} else {
@@ -164,43 +201,25 @@ hexInput.onkeyup = function() {
 }
 
 rgbInput.onkeyup = function() {
-	if (rgbInput.value == "") {
+	var hex = rgbToHex(rgbInput.value);
+	if (hex) {
+		hexInput.value = hex;
+		hslInput.value = rgbToHsl(rgbInput.value);
+		changeColorWithBg(hexToRgb(hex));
+	} else {
 		hexInput.value = "";
 		hslInput.value = "";
-	} else {
-		if (/^(rgb\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]),\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]),\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\))$/.test(rgbInput.value)) {
-			body.style.backgroundColor = rgbInput.value;
-			var rgb = rgbInput.value.replace("rgb(", "").replace(")", "").split(",");
-			var hex = rgbToHex(rgb);
-			hexInput.value = ("#").concat(hex.toUpperCase());
-			changeColorWithBg(rgb);
-			
-			hsl = rgbToHsl(rgb);
-			hslInput.value = "hsl(" + hsl[0] + "," + hsl[1] + "," + [hsl[2]] + ")";
-		} else {
-			hexInput.value = "";
-			hslInput.value = "";
-		}
 	}
 }
 
 hslInput.onkeyup = function() {
-	if (hslInput.value == "") {
+	var rgb = hslToRgb(hslInput.value);
+	if (rgb) {
+		rgbInput.value = rgb;
+		hexInput.value = rgbToHex(rgb);
+		changeColorWithBg(rgb);
+	} else {
 		hexInput.value = "";
 		rgbInput.value = "";
-	} else {
-		if (/^(hsl\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360),\s*([0-9]|[1-9][0-9]|100),\s*([0-9]|[1-9][0-9]|100)\s*\))$/.test(hslInput.value)) {
-			var hsl = hslInput.value.replace("hsl(", "").replace(")", "").split(",");
-			console.log(hsl);
-			var rgb = hslToRgb(hsl);
-			var hex = rgbToHex(rgb);
-			rgbInput.value = "rgb(" + rgb.join(", ") + ")";
-			hexInput.value = ("#").concat(hex.toUpperCase());
-			body.style.backgroundColor = rgbInput.value;
-			changeColorWithBg(rgb);
-		} else {
-			hexInput.value = "";
-			rgbInput.value = "";
-		}
 	}
 }
