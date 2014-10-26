@@ -8,20 +8,41 @@ var hslInput = document.getElementById('hsl');
 
 var body = document.getElementsByTagName('body')[0];
 
+
+function isHex(str) {
+	if (/^\s*#?([a-fA-F0-9]){6}\s*$/.test(str)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function removeSpaces(str) {
+	return str.replace(/\s/g, "");
+}
+
 // hexcode to [r,g,b] conversion
 function hexToRgb(hex) {
-	var hexArr = hex.split("");
-	var rgb = hexArr.reduce(function(p, c, i, a) {
-		if ((i % 2) == 0) {
-			p.push(c);
-		} else {
-			p[(i-1)/2] += c;
+	if (isHex(hex)) {
+		hex = removeSpaces(hex);
+		if (hex.charAt(0) == '#') {
+			hex = hex.substr(1);
 		}
-		return p;
-	}, []).map(function(num) {
-		return parseInt(num, 16);
-	});
-	return rgb;
+		var hexArr = hex.split("");
+		var rgb = "rgb(" + hexArr.reduce(function(p, c, i, a) {
+			if ((i % 2) == 0) {
+				p.push(c);
+			} else {
+				p[(i - 1) / 2] += c;
+			}
+			return p;
+		}, []).map(function(num) {
+			return parseInt(num, 16);
+		}).join(", ") + ")";
+		return rgb;
+	} else {
+		return false;
+	}
 }
 
 // [r,g,b] to hexcode conversion
@@ -39,6 +60,7 @@ function rgbToHex(rgb) {
 
 // [r,g,b] to [h,s,l] conversion
 function rgbToHsl(rgb){
+	rgb = rgb.replace("rgb(", "").replace(")", "").split(",");
     r = parseFloat((rgb[0]/255).toFixed(2)), g = parseFloat((rgb[1]/255).toFixed(2)), b = parseFloat((rgb[2]/255).toFixed(2));
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var d = max - min, sum = max + min;
@@ -110,7 +132,10 @@ function hslToRgb(hsl){
 }
 
 // change foreground components color with bg
-function changeColorWithBg(arr) {
+function changeColorWithBg(rgb) {
+	body.style.backgroundColor = rgb;
+
+	arr = rgb.replace("rgb(", "").replace(")", "").split(",");
 	var yiq = ((arr[0] * 299) + (arr[1] * 587) + (arr[2] * 114))/1000;
 	var fontColor = ((yiq >= 128) ? 'black' : 'white');
 	// ref: http://24ways.org/2010/calculating-color-contrast/
@@ -125,25 +150,16 @@ function changeColorWithBg(arr) {
 }
 
 hexInput.onkeyup = function() {
-	if (hexInput.value == "") {
+	var rgb = hexToRgb(hexInput.value)
+	if (rgb) {
+		var hsl = rgbToHsl(rgb);
+		hslInput.value = "hsl(" + hsl[0] + ", " + hsl[1] + ", " + [hsl[2]] + ")";
+
+		rgbInput.value = rgb;
+		changeColorWithBg(rgb);
+	} else {
 		rgbInput.value = "";
 		hslInput.value = "";
-	} else {
-		var hex = hexInput.value;
-		if (hex.charAt(0) == '#') {
-			hex = hex.substr(1);
-		}
-		if (hex.length == 6) {
-			body.style.backgroundColor = "#" + hex;
-			var rgb = hexToRgb(hex);
-			var hsl = rgbToHsl(rgb);
-			hslInput.value = "hsl(" + hsl[0] + ", " + hsl[1] + ", " + [hsl[2]] + ")";
-			rgbInput.value = "rgb(" + rgb.join(", ") + ")";
-			changeColorWithBg(rgb);
-		} else {
-			rgbInput.value = "";
-			hslInput.value = "";
-		}
 	}
 }
 
