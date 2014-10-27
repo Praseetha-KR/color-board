@@ -18,10 +18,10 @@ function strToNumArray(str) {
 }
 
 function isHex(str) {
-	if (/^\s*#?([a-fA-F0-9]){6}\s*$/.test(str)) {
+	if (/^\s*#?\s*([a-fA-F0-9]){6}\s*$/.test(str)) {
 		hex = removeSpaces(str);
-		if (hex.charAt(0) == '#') {
-			hex = hex.substr(1);
+		if (hex.charAt(0) != '#') {
+			hex = "#" + hex;
 		}
 		return hex;
 	} else {
@@ -43,7 +43,7 @@ function isHsl(str) {
 	if (/^(\s*(hsl|HSL)\s*\(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360)\s*(deg|degree|°)?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*\)\s*)$/.test(str)) {
 		return removeSpaces(str);
 	} else if (/^(\s*([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360)\s*(deg|degree|°)?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*,\s*([0-9]|[1-9][0-9]|100)\s*%?\s*)$/.test(str)) {
-		return removeSpaces(str);
+		return "hsl(" + removeSpaces(str) + ")";
 	} else {
 		return false;
 	}
@@ -53,6 +53,7 @@ function isHsl(str) {
 function hexToRgb(hex) {
 	if (isHex(hex)) {
 		hex = isHex(hex);
+		hex = hex.substr(1); // removes #
 		var hexArr = hex.split("");
 		var rgb = "rgb(" + hexArr.reduce(function(p, c, i, a) {
 			if ((i % 2) == 0) {
@@ -176,7 +177,7 @@ function changeColorWithBg(rgb) {
 
 	arr = rgb.replace("rgb(", "").replace(")", "").split(",");
 	var yiq = ((arr[0] * 299) + (arr[1] * 587) + (arr[2] * 114))/1000;
-	var fontColor = ((yiq >= 128) ? 'black' : 'white');
+	var fontColor = ((yiq <= 128) ? 'white' : 'black');
 	// ref: http://24ways.org/2010/calculating-color-contrast/
 
 	hexInput.style.color = fontColor;
@@ -188,56 +189,53 @@ function changeColorWithBg(rgb) {
 	document.getElementById('header').style.color = fontColor;
 }
 
+function colorSpaceConversion(color) {
+	var hex, rgb, hsl;
+	if (isHex(color)) {
+		hex = isHex(color);
+		rgb = hexToRgb(color);
+		hsl = rgbToHsl(hexToRgb(color));
+		return [hex, rgb, hsl];
+	} else if (isRgb(color)) {
+		hex = rgbToHex(color);
+		rgb = isRgb(color);
+		hsl = rgbToHsl(color);
+		return [hex, rgb, hsl];
+	} else if (isHsl(color)) {
+		hex = rgbToHex(hslToRgb(color));
+		rgb = hslToRgb(color);
+		hsl = isHsl(color);
+		return [hex, rgb, hsl];
+	} else {
+		return ["","",""];
+	}
+}
+
 hexInput.onkeyup = function() {
-	// get hexInput, convert to rgb
-	var rgb = hexToRgb(hexInput.value)
-	// if valid rgb
-	if (rgb) {
-		// show rgb in rgbInput field
-		rgbInput.value = rgb;
-		// convert rgbToHsl and show in hslInput field
-		hslInput.value = rgbToHsl(rgb);
-		// change bg & text colors with current color
-		changeColorWithBg(rgb);
-	} else { // if rgb invalud
-		// set rgbInput and hslInput to be empty
-		rgbInput.value = "";
-		hslInput.value = "";
+	var colorArray = colorSpaceConversion(hexInput.value);
+	if (colorArray != ["","",""]) {
+		rgbInput.value = colorArray[1];
+		hslInput.value = colorArray[2];
+		changeColorWithBg(colorArray[1]);
 	}
 }
 
 rgbInput.onkeyup = function() {
-	// get rgbInput, convert to hex
-	var hex = rgbToHex(rgbInput.value);
-	// if valid hex
-	if (hex) {
-		// show hex in hexInput field
-		hexInput.value = hex;
-		// convert rgbToHsl and show in hslInput field
-		hslInput.value = rgbToHsl(rgbInput.value);
-		// change bg & text colors with current color
-		changeColorWithBg(hexToRgb(hex));
-	} else { // if hex invalud
-		// set hexInput and hslInput to be empty
-		hexInput.value = "";
-		hslInput.value = "";
+	var colorArray = colorSpaceConversion(rgbInput.value);
+	if (colorArray != ["","",""]) {
+		hexInput.value = colorArray[0];
+		hslInput.value = colorArray[2];
+		changeColorWithBg(colorArray[1]);
 	}
 }
 
 hslInput.onkeyup = function() {
-	// get hslInput, convert to rgb
-	var rgb = hslToRgb(hslInput.value);
-	// if valid rgb
-	if (rgb) {
-		// show rgb in rgbInput field
-		rgbInput.value = rgb;
-		// convert rgbToHex and show in hexInput field
-		hexInput.value = rgbToHex(rgb);
-		// change bg & text colors with current color
-		changeColorWithBg(rgb);
-	} else { // if rgb invalud
-		// set rgbInput and hexInput to be empty
-		hexInput.value = "";
-		rgbInput.value = "";
+	var colorArray = colorSpaceConversion(hslInput.value);
+	if (colorArray != ["","",""]) {
+		hexInput.value = colorArray[0];
+		rgbInput.value = colorArray[1];
+		changeColorWithBg(colorArray[1]);
 	}
 }
+
+
