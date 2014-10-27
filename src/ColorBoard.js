@@ -189,36 +189,54 @@ function changeColorWithBg(rgb) {
 }
 
 hexInput.onkeyup = function() {
+	// get hexInput, convert to rgb
 	var rgb = hexToRgb(hexInput.value)
+	// if valid rgb
 	if (rgb) {
-		hslInput.value = rgbToHsl(rgb);
+		// show rgb in rgbInput field
 		rgbInput.value = rgb;
+		// convert rgbToHsl and show in hslInput field
+		hslInput.value = rgbToHsl(rgb);
+		// change bg & text colors with current color
 		changeColorWithBg(rgb);
-	} else {
+	} else { // if rgb invalud
+		// set rgbInput and hslInput to be empty
 		rgbInput.value = "";
 		hslInput.value = "";
 	}
 }
 
 rgbInput.onkeyup = function() {
+	// get rgbInput, convert to hex
 	var hex = rgbToHex(rgbInput.value);
+	// if valid hex
 	if (hex) {
+		// show hex in hexInput field
 		hexInput.value = hex;
+		// convert rgbToHsl and show in hslInput field
 		hslInput.value = rgbToHsl(rgbInput.value);
+		// change bg & text colors with current color
 		changeColorWithBg(hexToRgb(hex));
-	} else {
+	} else { // if hex invalud
+		// set hexInput and hslInput to be empty
 		hexInput.value = "";
 		hslInput.value = "";
 	}
 }
 
 hslInput.onkeyup = function() {
+	// get hslInput, convert to rgb
 	var rgb = hslToRgb(hslInput.value);
+	// if valid rgb
 	if (rgb) {
+		// show rgb in rgbInput field
 		rgbInput.value = rgb;
+		// convert rgbToHex and show in hexInput field
 		hexInput.value = rgbToHex(rgb);
+		// change bg & text colors with current color
 		changeColorWithBg(rgb);
-	} else {
+	} else { // if rgb invalud
+		// set rgbInput and hexInput to be empty
 		hexInput.value = "";
 		rgbInput.value = "";
 	}
