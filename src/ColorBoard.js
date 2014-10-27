@@ -210,32 +210,33 @@ function colorSpaceConversion(color) {
 		return ["","",""];
 	}
 }
-
-hexInput.onkeyup = function() {
-	var colorArray = colorSpaceConversion(hexInput.value);
+function displayColor(colorInput) {
+	var colorArray = colorSpaceConversion(colorInput);
 	if (colorArray != ["","",""]) {
-		rgbInput.value = colorArray[1];
-		hslInput.value = colorArray[2];
+		if (isHex(colorInput)){
+			rgbInput.value = colorArray[1];
+			hslInput.value = colorArray[2];
+		} else if (isRgb(colorInput)) {
+			hexInput.value = colorArray[0];
+			hslInput.value = colorArray[2];
+		} else if (isHsl(colorInput)) {
+			hexInput.value = colorArray[0];
+			rgbInput.value = colorArray[1];
+		}
 		changeColorWithBg(colorArray[1]);
 	}
+}
+
+hexInput.onkeyup = function() {
+	displayColor(this.value);
 }
 
 rgbInput.onkeyup = function() {
-	var colorArray = colorSpaceConversion(rgbInput.value);
-	if (colorArray != ["","",""]) {
-		hexInput.value = colorArray[0];
-		hslInput.value = colorArray[2];
-		changeColorWithBg(colorArray[1]);
-	}
+	displayColor(this.value);
 }
 
 hslInput.onkeyup = function() {
-	var colorArray = colorSpaceConversion(hslInput.value);
-	if (colorArray != ["","",""]) {
-		hexInput.value = colorArray[0];
-		rgbInput.value = colorArray[1];
-		changeColorWithBg(colorArray[1]);
-	}
+	displayColor(this.value);
 }
 
 
