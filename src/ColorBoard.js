@@ -227,16 +227,10 @@ function displayColor(colorInput) {
 	}
 }
 
-hexInput.onkeyup = function() {
-	displayColor(this.value);
+var input = document.getElementsByTagName("input");
+for (var i = 0; i < input.length; i++) {
+	input[i].onkeyup = function() {
+		displayColor(this.value);
+	}
 }
-
-rgbInput.onkeyup = function() {
-	displayColor(this.value);
-}
-
-hslInput.onkeyup = function() {
-	displayColor(this.value);
-}
-
 
